@@ -1,3 +1,20 @@
+// Licensed to Elasticsearch B.V. under one or more contributor
+// license agreements. See the NOTICE file distributed with
+// this work for additional information regarding copyright
+// ownership. Elasticsearch B.V. licenses this file to you under
+// the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 // +build integration
 
 package dbstats
@@ -5,12 +22,16 @@ package dbstats
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
+	"github.com/elastic/beats/libbeat/tests/compose"
 	mbtest "github.com/elastic/beats/metricbeat/mb/testing"
 	"github.com/elastic/beats/metricbeat/module/mongodb"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestFetch(t *testing.T) {
+	compose.EnsureUp(t, "mongodb")
+
 	f := mbtest.NewEventsFetcher(t, getConfig())
 	events, err := f.Fetch()
 	if !assert.NoError(t, err) {
@@ -30,14 +51,17 @@ func TestFetch(t *testing.T) {
 		objects := event["objects"].(int64)
 		assert.True(t, objects > 0)
 
-		avgObjSize := event["avg_obj_size"].(int64)
-		assert.True(t, avgObjSize > 0)
+		avgObjSize, err := event.GetValue("avg_obj_size.bytes")
+		assert.NoError(t, err)
+		assert.True(t, avgObjSize.(int64) > 0)
 
-		dataSize := event["data_size"].(int64)
-		assert.True(t, dataSize > 0)
+		dataSize, err := event.GetValue("data_size.bytes")
+		assert.NoError(t, err)
+		assert.True(t, dataSize.(int64) > 0)
 
-		storageSize := event["storage_size"].(int64)
-		assert.True(t, storageSize > 0)
+		storageSize, err := event.GetValue("storage_size.bytes")
+		assert.NoError(t, err)
+		assert.True(t, storageSize.(int64) > 0)
 
 		numExtents := event["num_extents"].(int64)
 		assert.True(t, numExtents >= 0)
@@ -45,12 +69,15 @@ func TestFetch(t *testing.T) {
 		indexes := event["indexes"].(int64)
 		assert.True(t, indexes >= 0)
 
-		indexSize := event["index_size"].(int64)
-		assert.True(t, indexSize > 0)
+		indexSize, err := event.GetValue("index_size.bytes")
+		assert.NoError(t, err)
+		assert.True(t, indexSize.(int64) > 0)
 	}
 }
 
 func TestData(t *testing.T) {
+	compose.EnsureUp(t, "mongodb")
+
 	f := mbtest.NewEventsFetcher(t, getConfig())
 	err := mbtest.WriteEvents(f, t)
 	if err != nil {
