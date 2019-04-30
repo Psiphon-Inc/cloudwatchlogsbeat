@@ -3,7 +3,7 @@ package beater
 import (
 	"fmt"
 
-	"github.com/e-travel/cloudwatchlogsbeat/cwl"
+	"github.com/Psiphon-Inc/cloudwatchlogsbeat/cwl"
 
 	"github.com/elastic/beats/libbeat/beat"
 	"github.com/elastic/beats/libbeat/common"
