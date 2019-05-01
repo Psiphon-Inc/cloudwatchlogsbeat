@@ -60,8 +60,11 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		}
 	}
 
-	// create beat publisher
-	beatClient := b.Publisher.Connect()
+	// create beat publisher, abort if connect fails
+	beatClient, err := b.Publisher.Connect()
+	if err != nil {
+		return nil, err
+	}
 
 	// Create instance
 	beat := &Cloudwatchlogsbeat{
