@@ -3,13 +3,16 @@ package main
 import (
 	"os"
 
-	"github.com/Psiphon-Inc/cloudwatchlogsbeat/beater"
+	"github.com/elastic/beats/libbeat/cmd/instance"
 
-	"github.com/elastic/beats/libbeat/beat"
+	"github.com/Psiphon-Inc/cloudwatchlogsbeat/beater"
 )
 
 func main() {
-	err := beat.Run("cloudwatchlogsbeat", "", beater.New)
+	settings := instance.Settings{
+		Name: "cloudwatchlogsbeat",
+	}
+	err := instance.Run(settings, beater.Creator)
 	if err != nil {
 		os.Exit(1)
 	}

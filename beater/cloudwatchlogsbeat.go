@@ -23,7 +23,7 @@ type Cloudwatchlogsbeat struct {
 }
 
 // Creates a new cloudwatchlogsbeat
-func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
+func Creator(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 	// Read configuration
 	config := cwl.DefaultConfig(DefaultAWSRegion)
 	if err := cfg.Unpack(config); err != nil {
