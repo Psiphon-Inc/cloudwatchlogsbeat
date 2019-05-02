@@ -64,13 +64,13 @@ func (group *Group) RefreshStreams() {
 			}
 			return true
 		})
+
 	if err != nil {
-		logp.Err("%s %s", group.Name, err.Error())
+		logp.Err("[group] %s describe log streams err. %s", group.Name, err.Error())
 	}
 }
 
 func (group *Group) removeStream(stream *Stream) {
-	logp.Info("Stop monitoring stream %s for group %s", stream.Name, group.Name)
 	group.mutex.Lock()
 	delete(group.streams, stream.Name)
 	group.mutex.Unlock()
@@ -80,10 +80,11 @@ func (group *Group) removeStream(stream *Stream) {
 func (group *Group) addNewStream(name string) {
 	finished := make(chan bool)
 	stream := NewStream(name, group, group.Prospector.Multiline, finished, group.Params)
-	logp.Info("Start monitoring stream %s for group %s", stream.Name, group.Name)
+
 	group.mutex.Lock()
 	group.streams[name] = stream
 	group.mutex.Unlock()
+
 	go stream.Monitor()
 	go func() {
 		<-finished
@@ -95,10 +96,13 @@ func (group *Group) addNewStream(name string) {
 func (group *Group) Monitor() {
 	logp.Info("[group] %s started", group.Name)
 	defer logp.Info("[group] %s stopped", group.Name)
+
 	reportTicker := time.NewTicker(group.Params.Config.ReportFrequency)
 	defer reportTicker.Stop()
+
 	streamRefreshTicker := time.NewTicker(group.Params.Config.StreamRefreshFrequency)
 	defer streamRefreshTicker.Stop()
+
 	for {
 		select {
 		case <-streamRefreshTicker.C:

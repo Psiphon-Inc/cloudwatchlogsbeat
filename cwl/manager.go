@@ -66,8 +66,10 @@ func (manager *GroupManager) addNewGroup(name string, prospector *Prospector) {
 func (manager *GroupManager) Monitor() {
 	ticker := time.NewTicker(manager.Params.Config.GroupRefreshFrequency)
 	defer ticker.Stop()
+
 	reportTicker := time.NewTicker(manager.Params.Config.ReportFrequency)
 	defer reportTicker.Stop()
+
 	for {
 		select {
 		case <-ticker.C:
@@ -79,5 +81,5 @@ func (manager *GroupManager) Monitor() {
 }
 
 func (manager *GroupManager) report() {
-	logp.Info("report[manager] %d %d", len(manager.Params.Config.Prospectors), len(manager.groups))
+	logp.Info("report[manager] number of prospectors: %d, number of groups: %d", len(manager.Params.Config.Prospectors), len(manager.groups))
 }

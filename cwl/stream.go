@@ -172,6 +172,7 @@ func (stream *Stream) digest(streamEvent *cloudwatchlogs.OutputLogEvent) {
 		Stream:    stream,
 		Timestamp: aws.Int64Value(streamEvent.Timestamp),
 	}
+
 	if stream.multiline == nil {
 		stream.buffer.WriteString(*streamEvent.Message)
 		stream.publish(event)
@@ -181,9 +182,11 @@ func (stream *Stream) digest(streamEvent *cloudwatchlogs.OutputLogEvent) {
 			if stream.multiRegex.MatchString(*streamEvent.Message) == stream.multiline.Negate {
 				stream.publish(event)
 			}
+
 			stream.buffer.WriteString(*streamEvent.Message)
 		case "before":
 			stream.buffer.WriteString(*streamEvent.Message)
+
 			if stream.multiRegex.MatchString(*streamEvent.Message) == stream.multiline.Negate {
 				stream.publish(event)
 			}
