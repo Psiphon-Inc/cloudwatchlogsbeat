@@ -38,7 +38,7 @@ func NewStream(name string, group *Group, multiline *Multiline, finished chan<- 
 		LogGroupName:  aws.String(group.Name),
 		LogStreamName: aws.String(name),
 		StartFromHead: aws.Bool(true),
-		Limit:         aws.Int64(stream.Params.Config.StreamEventLimit),
+		Limit:         aws.Int64(params.Config.StreamEventLimit),
 		StartTime:     aws.Int64(startTime.UnixNano() / 1e6),
 	}
 
