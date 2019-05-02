@@ -102,6 +102,7 @@ func (stream *Stream) Monitor() {
 	// first of all, read the stream's info from our registry storage
 	err := stream.Params.Registry.ReadStreamInfo(stream)
 	if err != nil {
+		logp.Err("[stream] %s encountered err [%s] on reading stream info", stream.FullName(), err.Error())
 		return
 	}
 
@@ -113,11 +114,12 @@ func (stream *Stream) Monitor() {
 	for {
 		err := stream.Next()
 		if err != nil {
-			logp.Err("%s %s", stream.FullName(), err.Error())
+			logp.Err("[stream] %s encountered err [%s] on next", stream.FullName(), err.Error())
 			return
 		}
 		// is the stream expired?
 		if IsBefore(stream.Params.Config.StreamEventHorizon, stream.LastEventTimestamp) {
+			logp.Info("[stream] %s is expired", stream.FullName())
 			return
 		}
 		// is the stream "hot"?
