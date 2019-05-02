@@ -45,16 +45,20 @@ func (group *Group) RefreshStreams() {
 				group.mutex.RLock()
 				_, ok := group.streams[name]
 				group.mutex.RUnlock()
+
 				// is this an empty stream?
 				if logStream.LastEventTimestamp == nil {
-					logp.Debug("GROUP", "%s/%s has a nil timestamp", group.Name, name)
+					logp.Debug("GROUP", "[stream] %s/%s has a nil timestamp", group.Name, name)
 					continue
 				}
+
 				// is the stream expired?
 				expired := IsBefore(group.Params.Config.StreamEventHorizon,
 					*logStream.LastEventTimestamp)
+
 				// is this a stream that we're not monitoring and it is not expired?
 				if !ok && !expired {
+					logp.Debug("GROUP", "[stream] %s/%s first event: %d, last event: %d, stored bytes: %d", group.Name, name, *logStream.FirstEventTimestamp, *logStream.LastEventTimestamp, *logStream.StoredBytes)
 					group.addNewStream(name)
 				}
 			}
@@ -106,8 +110,8 @@ func (group *Group) Monitor() {
 }
 
 func (group *Group) report() {
-	n := len(group.streams)
-	logp.Info("report[group] %d %d %d %s %s", n, group.newStreams, group.removedStreams, group.Name, group.Params.Config.ReportFrequency)
+	logp.Info("report[group] %s streams total: %d, added: %d, removed: %d, frequency: %s", group.Name, len(group.streams), group.newStreams, group.removedStreams, group.Params.Config.ReportFrequency)
+
 	group.newStreams = 0
 	group.removedStreams = 0
 }

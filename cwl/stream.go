@@ -64,7 +64,7 @@ func NewStream(name string, group *Group, multiline *Multiline, finished chan<- 
 	return stream
 }
 
-// Fetches the next batch of events from the cloudwatchlogs stream
+// Next fetches the next batch of events from the cloudwatchlogs stream
 // returns the error (if any) otherwise nil
 func (stream *Stream) Next() error {
 	var err error
@@ -88,7 +88,7 @@ func (stream *Stream) Next() error {
 	return err
 }
 
-// Coninuously monitors the stream for new events. If an error is
+// Monitor continuously monitors the stream for new events. If an error is
 // encountered, monitoring will stop and the stream will send an event
 // to the finished channel for the group to cleanup
 func (stream *Stream) Monitor() {
@@ -102,7 +102,7 @@ func (stream *Stream) Monitor() {
 	// first of all, read the stream's info from our registry storage
 	err := stream.Params.Registry.ReadStreamInfo(stream)
 	if err != nil {
-		logp.Err("[stream] %s encountered err [%s] on reading stream info", stream.FullName(), err.Error())
+		logp.Err("[stream] %s encountered err on reading stream info. %s", stream.FullName(), err.Error())
 		return
 	}
 
@@ -114,20 +114,23 @@ func (stream *Stream) Monitor() {
 	for {
 		err := stream.Next()
 		if err != nil {
-			logp.Err("[stream] %s encountered err [%s] on next", stream.FullName(), err.Error())
+			logp.Err("[stream] %s encountered err on next. %s", stream.FullName(), err.Error())
 			return
 		}
+
 		// is the stream expired?
 		if IsBefore(stream.Params.Config.StreamEventHorizon, stream.LastEventTimestamp) {
 			logp.Info("[stream] %s is expired", stream.FullName())
 			return
 		}
+
 		// is the stream "hot"?
 		if stream.IsHot(stream.LastEventTimestamp) {
 			eventRefreshFrequency = stream.Params.Config.HotStreamEventRefreshFrequency
 		} else {
 			eventRefreshFrequency = stream.Params.Config.StreamEventRefreshFrequency
 		}
+
 		select {
 		case <-reportTicker.C:
 			stream.report()
@@ -142,8 +145,8 @@ func (stream *Stream) IsHot(lastEventTimestamp int64) bool {
 }
 
 func (stream *Stream) report() {
-	logp.Info("report[stream] %d %s %s",
-		stream.publishedEvents, stream.FullName(), stream.Params.Config.ReportFrequency)
+	logp.Info("report[stream] %s published events: %d, frequency: %s",
+		stream.FullName(), stream.publishedEvents, stream.Params.Config.ReportFrequency)
 	stream.publishedEvents = 0
 }
 
@@ -157,6 +160,7 @@ func (stream *Stream) publish(event *Event) {
 	if stream.buffer.Len() == 0 {
 		return
 	}
+
 	event.Message = stream.buffer.String()
 	stream.Params.Publisher.Publish(event)
 	stream.buffer.Reset()
