@@ -33,6 +33,8 @@ type Config struct {
 	StreamEventHorizon          time.Duration `config:"stream_event_horizon"`
 	StreamEventRefreshFrequency time.Duration `config:"stream_event_refresh_frequency"`
 
+	StreamEventLimit int64 `config:"stream_event_limit"`
+
 	Prospectors []Prospector `config:"prospectors"`
 }
 
@@ -44,6 +46,7 @@ func DefaultConfig(awsRegion string) *Config {
 		AWSRegion:                   awsRegion,
 		StreamEventHorizon:          10 * time.Minute,
 		StreamEventRefreshFrequency: 5 * time.Second,
+		StreamEventLimit:            100,
 	}
 }
 
@@ -72,6 +75,7 @@ func (config *Config) String() string {
 		fmt.Sprintf("|report_frequency=%v", config.ReportFrequency) +
 		fmt.Sprintf("|stream_event_horizon=%v", config.StreamEventHorizon) +
 		fmt.Sprintf("|stream_event_refresh_frequency=%v", config.StreamEventRefreshFrequency) +
+		fmt.Sprintf("|stream_event_limit=%v", config.StreamEventLimit) +
 		fmt.Sprintf("|hot_stream_event_horizon=%v", config.HotStreamEventHorizon) +
 		fmt.Sprintf("|hot_stream_event_refresh_frequency=%v", config.HotStreamEventRefreshFrequency)
 }
