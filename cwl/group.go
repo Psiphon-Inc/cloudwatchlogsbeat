@@ -58,7 +58,7 @@ func (group *Group) RefreshStreams() {
 
 				// is this a stream that we're not monitoring and it is not expired?
 				if !ok && !expired {
-					logp.Debug("GROUP", "[stream] %s/%s first event: %d, last event: %d, stored bytes: %d", group.Name, name, *logStream.FirstEventTimestamp, *logStream.LastEventTimestamp, *logStream.StoredBytes)
+					logp.Info("[stream] %s/%s first event: %d, last event: %d, stored bytes: %d", group.Name, name, *logStream.FirstEventTimestamp, *logStream.LastEventTimestamp, *logStream.StoredBytes)
 					group.addNewStream(name)
 				}
 			}
